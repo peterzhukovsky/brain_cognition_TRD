@@ -2,8 +2,8 @@
 This repo includes scripts used to analyze brain-cognition relationships in the OPTIMUM-NEURO dataset (OPT-NEURO ClinicalTrials.gov number, NCT02960763 and OPTIMUM Award TRD-1511-33321, while OPTIMUM-Neuro was funded by the NIMH via a collaborative R01 mechanism (Pittsburgh: MH114969; Washington University: MH114966, CAMH/Toronto: MH114970; UCLA: MH114981; Columbia: MH114980) of treatment-resistant late-life depression.
 
 The results are published under
-Brain-cognition relationships and treatment outcome in treatment-resistant late-life depression
-Peter Zhukovsky, Meryl A. Butters, Helen Lavretsky, Patrick Brown, Joshua S. Shimony, Eric J Lenze, Daniel M Blumberger, Alastair J Flint, Jordan Karp, Steven Roose, Erin W Dickie, Daniel Felsky, Ginger E Nichol, Yar Al-Dabagh, Nicole Schoer, Feyifolu Obiri, Ashlyn Runk, Kayla Conaty, Benoit H Mulsant, Aristotle N Voineskos
+
+*Brain-cognition relationships and treatment outcome in treatment-resistant late-life depression* Peter Zhukovsky, Meryl A. Butters, Helen Lavretsky, Patrick Brown, Joshua S. Shimony, Eric J Lenze, Daniel M Blumberger, Alastair J Flint, Jordan Karp, Steven Roose, Erin W Dickie, Daniel Felsky, Ginger E Nichol, Yar Al-Dabagh, Nicole Schoer, Feyifolu Obiri, Ashlyn Runk, Kayla Conaty, Benoit H Mulsant, Aristotle N Voineskos
 
 Individual scripts include:
 
