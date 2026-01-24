@@ -43,7 +43,7 @@ d(d.SITE_MRI_1_WU_2_UT_3_UP_4_LA_5_CU==5,:)=[];
 demo_OPT=innerjoin(d, subjects);
 figure;histogram(demo_OPT.rh_entorhinal_thickness)
 %demo_OPT([110,214],:)=[]; % two outliers with very low values
-demo_OPT( strcmp(demo_OPT.ID, 'WU10014'), :)=[];
+demo_OPT( strcmp(demo_OPT.ID, 'WU10014'), :)=[]; demo_OPT = removevars(demo_OPT, 'SITE_TXT_data');
 CT=demo_OPT{:,[573:640, 644:649]};
 ct_names=demo_OPT.Properties.VariableNames([573:640, 644:649]);
 
@@ -67,6 +67,11 @@ full_harmonized=full_harmonized';
 max(rval)
 min(rval)
 ct_names(pval<0.01)
+
+%% sensitivity subsetting
+%ixx=demo_OPT.NCD_01~=1; 
+%ixx=demo_OPT.MCI_01~=1 & demo_OPT.DEM_01~=1 ; 
+%full_harmonized(ixx,:)=[]; demo_OPT(ixx,:)=[]; clear ixx;
 
 %% PLS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -547,6 +552,7 @@ Xlogist=[madrs_cut{:,[595:662, 666:671]}, madrs_cut.AGE, madrs_cut.GENDER, madrs
 %anova1(madrs_cut.EXEC_01, madrs_cut.remission);anova1(madrs_cut.baseline_madrs_scr, madrs_cut.remission);
 varnames=[ct_names, {'age'}, {'sex'},{'blmadrs'}, {'MemD'}, {'Exec'}, {'Attn'}];
 Ylogist=madrs_cut.remission;
+%violin(madrs_cut.baseline_madrs_scr, baseline_madrs_scr.remission)
 
 [B,FitInfo] = lassoglm(Xlogist,Ylogist,'binomial','CV',10, 'PredictorNames', varnames,'alpha', 0.1);
 %lassoPlot(B,FitInfo,'PlotType','CV'); legend('show','Location','best') % show legend
@@ -564,7 +570,8 @@ yhat = glmval(coef,Xlogist,'logit');[X,Y,T,AUC] = perfcurve(Ylogist,yhat, 1);AUC
 %Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr]; varnames=[{'age'}, {'sex'},{'blmadrs'}];
 permutation_index = randperm(length(Ylogist));%for randfold=1%:20
 figure;coef_all=[];confusionmatrices=[];yhat_all=[];ytest_all=[];yhatBinom_all=[]; n=length(madrs_cut.ID_madrs_cut)
-for i=1:100 %8
+%n=394 > 10fold > 40 (40*0.26); %%% n=199 > 8fold > 25 (20*0.33)
+for i=1:500 %8
 %   if(i==1); ix=zeros([n,1]); ix(1:20)=1; elseif (i==8)
 %   ix=zeros([n,1]); ix(20*(i-1)+1:n)=1; else
 %   ix=zeros([n,1]); ix(20*(i-1)+1:20*(i-1)+20)=1; end; ix=ix(permutation_index);
@@ -657,6 +664,8 @@ tmp = nan(nbars, ngroups); for i = 1:nbars    tmp(i) = b.XEndPoints(i); end
 errorbar(tmp',mean(AUC_test_all'), 2*SEM,'k','linestyle','none');ylim([0.5 0.8]);hold on
 figure(3); b = bar([1; 2; 3],diag(mean(AUC_test_all')),'stacked');
 b(1).FaceColor=[255/255 0 127/255];b(2).FaceColor=[204/255 0 204/255]; b(3).FaceColor=[76/255 0 153/255];ylim([0.5 0.81])
+
+
 %%
 %% MULTINOMIAL !!! LOGISTIC REG
 Xlogist=[madrs_cut{:,[188:255, 259:264]}, madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr, madrs_cut.RC_Z, madrs_cut.DTMT4_Scaled];%, madrs_cut.DTMT5_Scaled, madrs_cut.RSM_Z, madrs_cut.RSR_Z

@@ -15,7 +15,7 @@ part_icad25(sub,:)=rmat(triu(ones(D),1)==1)';
 %rmat_icad25(sub,:)=rmat(triu(ones(D),1)==1)';
 end; clear rmat Fnetmats_all Pnetmats_all %% reshape the netmats to one line from the square form
 %%% Additional bl subjects
-load('C:\Users\peter\Documents\OPT\OPT\reports\rsfc_2023\OPT_rsfmri_5_12.mat');
+%load('C:\Users\peter\Documents\OPT\OPT\reports\rsfc_2023\OPT_rsfmri_5_12.mat');
 
 
 ix=isnan(full_icad25(:,1));ix=isnan(mean_fd');
@@ -29,7 +29,8 @@ clear ix; for i=1:length(qcfail)
 end; ix=sum(ix')';
 subjects.rsfc=full_icad25;subjects.part_rsfc=part_icad25;subjects.mean_fd=mean_fd';
 subjects(ix==1,:)=[]; subjects.scanner= ~cellfun(@isempty,(strfind(subjects.ID_complete, 'CU'))) |  ~cellfun(@isempty,(strfind(subjects.subs, 'UT1UT1')))  |  ~cellfun(@isempty,(strfind(subjects.subs, 'UT1UT3'))) ;
-d=readtable('C:\Users\peter\Documents\OPT\OPT\data\ON_DATASET_08302024.xlsx'); d.ID=d.ID_complete;
+d=readtable('C:\Users\peter\Documents\OPT\OPT\data\ON_DATASET_08302024.xlsx'); d.ID=d.ID_complete; %not useful d=readtable('C:\Users\peter\Documents\OPT\OPT\data\OPT N NeuroCog Data 20250617.xlsx'); d.ID=d.ASITE_ID;
+
 %%
 d.CWI3CSSFinal_01(d.CWI3CSSFinal_01>80)=NaN;
 d.DTMTS4_01(d.DTMTS4_01>80)=NaN;
@@ -76,6 +77,11 @@ full_harmonized=full_harmonized';
 min(rval)
 min(pval)
 %ICs_vector(mafdr(p, 'BHFDR', true)<0.01) %r(mafdr(p, 'BHFDR', true)<0.01)
+%% sensitivity subsetting
+%ixx=demo_OPT.NCD_01~=1; 
+%ixx=demo_OPT.MCI_01~=1 & demo_OPT.DEM_01~=1 ; 
+%full_harmonized(ixx,:)=[]; mean_fd(ixx,:)=[]; demo_OPT(ixx,:)=[]; clear ixx;
+
 %% PLS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Y=[demo_OPT.AIS_01, demo_OPT.IMIS_01, demo_OPT.MDMIS_01, demo_OPT.LIS_01, demo_OPT.MVCIS_01, demo_OPT.EXEC_01];
@@ -90,7 +96,7 @@ ncomp=3
 %% permutation testing
 permutations=5000;  
 allobservations=Y;
-for ncomp=1:3
+for ncomp=1:2
    
     parfor n = 1:permutations
     % selecting either next combination, or random permutation
@@ -110,7 +116,7 @@ end
 
 [XL,YL,XS,YS,BETA,PCTVAR,MSE,stats] = plsregress(x,Y,ncomp);PCTVAR
 [c,pval]=corr(XS, Y); c(1,:)=c(1,:)*-1; %c(3,:)=c(3,:)*-1; % c(2,:)=c(2,:)*-1;   reshape(mafdr(reshape(pval, [1 36]), 'BHFDR', 'True'), [4 9])
-figure;imagesc(c(2,:)); colormap bone; colorbar
+figure;imagesc(c(1:2,:)); colormap bone; colorbar
 l=length(Y(1,:)); combs=allcomb([1:3], [1:l]);figure(13);
 for i=1:length(combs)
 hold off; ix1=combs(i,1);ix2=combs(i,2); subplot(3,l,i);
@@ -327,9 +333,9 @@ madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'end
 madrs_cut(madrs_cut.remission==0,:)=[];
 madrs_cut.remission=madrs_cut.madrs_tot_scr<=10;
 
-madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'step_2'))) ; %step 2 and arm 7 or step 1 and arm 8
+madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'step_1'))) ; %step 2 and arm 7 or step 1 and arm 8
 madrs_cut(madrs_cut.remission==1,:)=[];
-madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'arm_7'))) ;
+madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'arm_8'))) ;
 madrs_cut(madrs_cut.remission==1,:)=[];
 madrs_cut.remission=madrs_cut.madrs_tot_scr<=10;
 %madrs_cut(madrs_cut.OnAripiprazole~=1,:)=[];%madrs_cut(madrs_cut.OnBupropion~=1,:)=[];%madrs_cut(madrs_cut.OnNortriptyline~=1,:)=[];%
@@ -353,17 +359,21 @@ coef = [B0; B(:,idxLambdaMinDeviance)];
 yhat = glmval(coef,Xlogist,'logit');[X,Y,T,AUC] = perfcurve(Ylogist,yhat, 1);AUC
 %Xlogist=Xlogist(:,B(:,idxLambdaMinDeviance)~=0);varnames=varnames(B(:,idxLambdaMinDeviance)~=0); %pasimonious model test > set alpha to very low 0.001
 
-figure;coef_all=[];confusionmatrices=[];yhat_all=[];ytest_all=[];yhatBinom_all=[];
-for i=1:10
+figure;coef_all=[];confusionmatrices=[];yhat_all=[];ytest_all=[];yhatBinom_all=[]; 
+for i=1:500
     %if(i==1); ix=zeros([304,1]); ix(1:30)=1; elseif (i==10)
     %ix=zeros([304,1]); ix(30*(i-1)+1:30*(i-1)+34)=1; else
     %ix=zeros([304,1]); ix(30*(i-1)+1:30*(i-1)+30)=1; end
+    %if(i==1); ix=zeros([135,1]); ix(1:20)=1; elseif (i==10)
+    %ix=zeros([135,1]); ix(20*(i-1)+1:135)=1; else
+    %ix=zeros([135,1]); ix(20*(i-1)+1:20*(i-1)+20)=1; end
+    %ix=ix(permutation_index);
 permutation_index = randperm(length(Ylogist));ix=zeros([length(madrs_cut.ID_madrs_cut), 1]);
-ix(permutation_index(1:30))=1;  %ix(permutation_index(31:304))=0;  
+ix(permutation_index(1:20))=1;  %ix(permutation_index(31:304))=0;  
 XTest=Xlogist(ix==1,:);XTrain=Xlogist(ix==0,:); 
 yTest=Ylogist(ix==1);yTrain=Ylogist(ix==0);
 
-[B,FitInfo] = lassoglm(XTrain,yTrain,'binomial','CV',10, 'PredictorNames', varnames,'alpha', 0.5);
+[B,FitInfo] = lassoglm(XTrain,yTrain,'binomial','CV',10, 'PredictorNames', varnames,'alpha', 0.0001);
 idxLambdaMinDeviance = FitInfo.IndexMinDeviance;
 B0 = FitInfo.Intercept(idxLambdaMinDeviance);
 coef = [B0; B(:,idxLambdaMinDeviance)]; coef_all=[coef_all,coef];
@@ -603,32 +613,16 @@ cirsg=innerjoin(cirsg, d_OPT);
 [rr,pp]=corr(XS, cirsg.cirsgtotal, 'rows', 'pairwise')
 
 %% demographic stats
-%d_OPT=d;
-d_OPT.NC_MCI_DEM=zeros([length(d_OPT.GENDER),1]);d_OPT.NC_MCI_DEM(d_OPT.MCI==1)=1; d_OPT.NC_MCI_DEM(d_OPT.DEM==1)=2; 
-d_OPT.SEX=d_OPT.GENDER==2; d.MOCATOTALRAWSCORE(d.MOCATOTALRAWSCORE==95)=NaN;
-grpstats(d_OPT, "NC_MCI_DEM", {'mean','std'}, "DataVars",{'AGE', 'ED', 'MOCATOTALRAWSCORE'})
-grpstats(d_OPT, "NC_MCI_DEM",  'sum', "DataVars",{'SEX'})
-
-grpstats(d_OPT, "NC_MCI_DEM", {'mean','std'}, "DataVars",{'ED'})
+%d(end,:) = []; d_OPT=d; 
+%subjects=table; try; subjects.ID_complete={'CU10001';'CU10003';'CU10007';'CU10009';'CU10010';'CU10012';'CU10014';'CU10021';'CU10022';'CU10023';'CU10024';'CU10026';'CU10031';'CU10033';'CU10034';'CU10038';'CU10045';'CU10056';'CU10057';'CU10060';'CU10070';'CU10074';'CU10076';'CU10078';'CU10079';'CU10081';'CU10083';'CU10084';'CU10088';'CU10089';'CU10091';'CU10098';'CU10099';'CU10101';'CU10104';'CU10109';'CU10110';'CU10114';'CU10119';'CU10141';'CU10146';'CU20002';'CU20003';'CU20005';'CU20006';'CU20011';'CU20015';'CU20016';'LA10006';'LA10008';'LA10026';'LA10032';'LA10035';'LA10038';'LA10040';'LA10044';'LA10048';'LA10054';'LA10056';'LA10074';'LA10099';'LA10104';'LA10105';'LA20002';'LA20012';'LA20019';'LA20021';'LA20032';'LA20039';'LA20043';'UP10004';'UP10007';'UP10044';'UP10047';'UP10057';'UP10071';'UP10074';'UP10076';'UP10077';'UP10092';'UP10094';'UP10110';'UP10124';'UP10155';'UP10266';'UP10280';'UP10005';'UP10021';'UP10046';'UP10053';'UP10061';'UP10062';'UP10087';'UP10109';'UP10111';'UP10133';'UP10137';'UP10148';'UP10165';'UP10203';'UP10206';'UP10231';'UP10258';'UP10261';'UP10001';'UP10003';'UP10006';'UP10009';'UP10020';'UP10026';'UP10032';'UP10049';'UP10054';'UP10058';'UP10066';'UP10080';'UP10081';'UP10090';'UP10096';'UP10098';'UP10101';'UP10112';'UP10113';'UP10114';'UP10125';'UP10126';'UP10128';'UP10130';'UP10135';'UP10136';'UP10151';'UP10156';'UP10158';'UP10161';'UP10163';'UP10171';'UP10173';'UP10175';'UP10184';'UP10187';'UP10188';'UP10196';'UP10201';'UP10204';'UP10209';'UP10210';'UP10229';'UP10244';'UP10250';'UT10006';'UT10018';'UT10023';'UT10066';'UT10067';'UT10072';'UT10073';'UT10075';'UT10078';'UT10079';'UT10080';'UT10083';'UT10091';'UT10109';'UT10111';'UT10115';'UT10116';'UT10125';'UT10126';'UT10128';'UT10130';'UT10137';'UT10148';'UT30006';'UT30008';'UT30011';'UT30018';'UT30019';'UT30021';'UT30025';'UT30026';'UT30027';'UT30028';'UT30030';'UT30032';'UT30033';'UT30034';'UT30036';'UT30040';'UT30042';'UT10001';'UT10003';'UT10004';'UT10013';'UT10015';'UT10016';'UT10019';'UT10021';'UT10025';'UT10033';'UT10035';'UT10039';'UT10046';'UT10054';'UT10081';'UT10087';'UT10090';'UT10114';'UT10120';'UT10123';'UT10144';'UT30003';'UT30029';'UT30031';'UT30039';'UT30041';'UT30043';'WU10089';'WU10031';'WU10055';'WU10057';'WU10085';'WU10099';'WU10105';'WU10114';'WU10115';'WU10117';'WU10127';'WU10131';'WU10137';'WU10146';'WU10150';'WU10152';'WU10157';'WU10161';'WU10164';'WU10168';'WU10174';'WU10189';'WU20001';'WU20002';'WU20004';'WU20005';'WU20006';'WU10008';'WU10014';'WU10028';'WU10034';'WU10036';'WU10054';'WU10058';'WU10059';'WU10062';'WU10064';'WU10066';'WU10071';'WU10073';'WU10077';'WU10083';'WU10087';'WU10092';'WU10093';'WU10096';'WU10104';'WU10107';'WU10108';'WU10112';'WU10121';'WU10122';'WU10124';'WU10128';'WU10135';'WU10141';'WU10145';'WU10147';'WU10149';'WU10151';'WU10154';'WU10158';'WU10165';'WU10166';'WU10177';'CU20013';'LA20030';'UT10151';'LA10097'};end
+%d_OPT=innerjoin(d_OPT, subjects); 
 
 mean(d_OPT.AGE)
 std(d_OPT.AGE)
 sum(d_OPT.GENDER==2)/length(d_OPT.GENDER)
 
-
-clinical_OPT.NC_MCI_DEM=d_OPT.NC_MCI_DEM;
-grpstats(clinical_OPT, "NC_MCI_DEM", {'mean','std'}, "DataVars",{'madrs_tot_scr'})
-clinical_OPT.NC_MCI_DEM=d_OPT.NC_MCI_DEM;
-grpstats(clinical_OPT, "NC_MCI_DEM", {'mean','std'}, "DataVars",{'athf_total_score_v2'})
-
-cirsg.NC_MCI_DEM=d_OPT.NC_MCI_DEM;
-grpstats(cirsg, "NC_MCI_DEM", {'mean','std'}, "DataVars",{'cirsgtotal'})
-
-
 d_OPT.HL(d_OPT.HL>3)=NaN;
-[tbl, chisq, p]=crosstab(d_OPT.RACE,d_OPT.NC_MCI_DEM)
-[tbl, chisq, p]=crosstab(d_OPT.HL,d_OPT.NC_MCI_DEM)
-
+sum(d_OPT.HL==1)
 
 mean(d.AGE)
 std(d.AGE)
@@ -651,25 +645,51 @@ nanstd(cirsg.cirsgtotal)
 
 nanmean(d.MOCATOTALRAWSCORE)
 nanstd(d.MOCATOTALRAWSCORE)
+sum(d.CDRSCORE_01==0)
+sum(d.CDRSCORE_01==0.5)
+sum(d.CDRSCORE_01==1)
+sum(d.CDRSCORE_01==2)
+sum(isnan(d.CDRSCORE_01) | d.CDRSCORE_01>3)
+
+sum(d.MCI_01==1)
+sum(d.DEM_01==1)
+sum(d.NCD_01==1)
+
+
+sum(d_OPT.MCI_01==1)
+sum(d_OPT.DEM_01==1)
+sum(d_OPT.NCD_01==1)
+
+sum(d_OPT.CDRSCORE_01==0)
+sum(d_OPT.CDRSCORE_01==0.5)
+sum(d_OPT.CDRSCORE_01==1)
+sum(d_OPT.CDRSCORE_01==2)
+sum(isnan(d_OPT.CDRSCORE_01) | d_OPT.CDRSCORE_01>3)
+
 
 %% visual for timeline
-figure;
+madrs=readtable('C:\Users\peter\Documents\OPT\OPT\data\OPT N MADRS Longitudinally with Study Meds 20230921');madrs(strcmp(madrs.ID, 'UP10209'),:)=[];
+%madrs=readtable('C:\Users\peter\Documents\OPT\OPT\data\OPTIMUMMainDatabaseF_DATA_2023-07-03_0248_ALL_MADRS.csv');
+
+
+madrs=readtable('C:\Users\peter\Documents\OPT\OPT\data\MADRS_Longitudinally_20230711_updated');
+subs=table(d_OPT.ID_complete, 'VariableNames',{'ID'});subs.NPDateDays=d_OPT.NPDateDaysKaylaUPDATE;
+%madrs=outerjoin(subs, madrs);
+
 for i=1:length(subs.ID);try
     sub=subs.ID{i};
     data=madrs(strcmp(madrs.ID, sub),:);
-    data.DaysDiff=data.MADRSDateDays-d_OPT.NPDateDaysKaylaUPDATE(strcmp(d_OPT.ID, sub));
+    MADRS_BL(i)=data.madrs_tot_scr(1);
+    data.DaysDiff=data.MADRSDateDays-d_OPT.NPDateDaysKaylaUPDATE(strcmp(d_OPT.ID_complete, sub));
     ix=abs(data.DaysDiff)==min(abs(data.DaysDiff));
-    MADRS_NP(i)=data.madrs_tot_scr(ix);MADRS_DateDiffNP(i)=data.DaysDiff(ix);
+    MADRS_NP(i)=data.madrs_tot_scr(ix);MADRS_DateDiffNP(i)=data.DaysDiff(ix);%MADRS_TRUE_BL(i)=(ix(1)==1);
     startstudydate=min(min([data.start_step1days, data.start_step2days]));
-    MADRS_length_studyNP(i)=data.MADRSDateDays(ix==1)-startstudydate;
-    toplot(i,:)=[MADRS_length_studyNP(i), MADRS_length_studyNP(i)+data.DaysDiff(ix==1), MADRS_DateDiffNP(i)];
-    %if abs(MADRS_DateDiffNP(i))<=60
-    %plot(toplot(i,:),[i;i],'k', 'LineWidth',3); hold on;
-    %end
+    MADRS_length_studyNP(i)=data.MADRSDateDays(ix)-startstudydate;MADRS_TRUE_BL(i)=(MADRS_length_studyNP(i))<42; 
     catch
     MADRS_NP(i)=NaN;MADRS_BL(i)=NaN;MADRS_DateDiff(i)=NaN;MADRS_length_studyNP(i)=NaN;
 end; end
-toplot(:,4)=MADRS_groups;
+
+MADRS_NP(abs(MADRS_DateDiffNP)>60)=NaN;MADRS_TRUE_BL=double(MADRS_TRUE_BL);MADRS_TRUE_BL(isnan(MADRS_NP))=NaN;
 
 toplot=sortrows(toplot,1);
 for i=1:length(subs.ID);
