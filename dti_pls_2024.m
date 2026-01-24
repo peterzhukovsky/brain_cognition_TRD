@@ -85,6 +85,10 @@ sex = dummyvar(sex);
 mod = [demo_OPT.RACE demo_OPT.HL demo_OPT.ED age sex(:,2)];
 FA_harmonized = combat(dat, batch, mod, 1);
 FA_harmonized=FA_harmonized';
+%% sensitivity subsetting
+%ixx=demo_OPT.NCD_01~=1; 
+%ixx=demo_OPT.MCI_01~=1 & demo_OPT.DEM_01~=1 ; 
+%FA_harmonized(ixx,:)=[]; demo_OPT(ixx,:)=[]; clear ixx;
 
 %% PLS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,7 +96,7 @@ Y=[demo_OPT.AIS_01, demo_OPT.IMIS_01, demo_OPT.MDMIS_01, demo_OPT.LIS_01, demo_O
 Y=[demo_OPT.AIS_01, demo_OPT.IMIS_01, demo_OPT.MDMIS_01, demo_OPT.LIS_01, demo_OPT.MVCIS_01, ...
     demo_OPT.CWI3CSSFinal_01,demo_OPT.CWI4CSSFinal_01, demo_OPT.DIFFSS_01, demo_OPT.DTMTS5_01, demo_OPT.DTMTS4_01];
 X=FA_harmonized;
-figure;imagesc(corr(X,Y)); colormap jet
+figure;imagesc(corr(X,Y,"rows","pairwise")); colormap jet
 %%% remove nans
 naninx=sum(isnan(X)')'>0| sum(isnan(Y)')'>0 ; Y=Y(naninx==0,:);  X=X(naninx==0,:);  d_OPT=demo_OPT(naninx==0,:);
 Y=zscore(Y); X=zscore(X);x=X;
