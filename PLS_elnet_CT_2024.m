@@ -882,4 +882,5 @@ hold on; [ngroups,nbars] = size(mean(AUC_test_all'));
 tmp = nan(nbars, ngroups); for i = 1:nbars    tmp(i) = b.XEndPoints(i); end
 errorbar(tmp',mean(AUC_test_all'), 2*SEM,'k','linestyle','none');ylim([0.5 0.8]);hold on
 b = bar([1; 2; 3],diag(mean(AUC_test_all')),'stacked');
+
 b(1).FaceColor=[255/255 0 127/255];b(2).FaceColor=[204/255 0 204/255]; b(3).FaceColor=[76/255 0 153/255];
