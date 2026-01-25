@@ -28,11 +28,11 @@ The script is split into several parts:\
 10. PLS latent score associations with antidepressant treatment history form (ATHF), i.e. treatment resistance (ln 526:539)
 **II. Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**\
 11. Importing longitudinal MADRS data (ln 235)\
-   >a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline (ln 236:270)\
-   >b. plotting and merging MADRS with baseline data (ln 280:305)\
+   a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline (ln 236:270)\
+   b. plotting and merging MADRS with baseline data (ln 280:305)\
 12. Elastic net models predicting remission (MADRS) from baseline data (ln 330:394)\
-   >a. cross-validation (330:394)\
-   >b. plotting (ln 395:410)\
+   a. cross-validation (330:394)\
+   b. plotting (ln 395:410)\
 13. Visualizing the timeline of assessments (ln 670:720)\
 
 # 2. dti_pls
