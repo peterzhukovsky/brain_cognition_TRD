@@ -27,7 +27,7 @@ The script is split into several parts:\
 9. PLS latent score associations with centile brain scores (ln 513:525)
 10. PLS latent score associations with antidepressant treatment history form (ATHF), i.e. treatment resistance (ln 526:539)\
 
-**II. Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**
+**II. Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**\
 11. Importing longitudinal MADRS data (ln 235)\
    a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline (ln 236:270)\
    b. plotting and merging MADRS with baseline data (ln 280:305)\
