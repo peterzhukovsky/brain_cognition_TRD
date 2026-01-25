@@ -36,10 +36,38 @@ The script is split into several parts:
 9. Elastic net models predicting remission (MADRS) from baseline data _(ln 330:394)_\
    a. cross-validation _(330:394)_\
    b. plotting _(ln 395:410)_\
-10. Visualizing the timeline of assessments _(ln 670:720)_\
+10. Visualizing the timeline of assessments _(ln 670:720)_
 
 # 2. dti_pls
 This script imports fractional anisotropy (FA) derivatives from DTI imaging (mean FA in ~60 tracts that were successfully reconstructed using UKF tractography); it cleans the cognitive data and runs partial least squares regression analyses testing for brain-cogntion relationships; finally it runs separate sets of elastic net regularized logitstic regression models with cross-validation to predict remission (MADRS<=10) in step 1 and step 2 of the OPTIMUM RCT starting with clinical data only, then adding cognitive data and then adding FA data as predictors in the same set of subjects. 
+The script is split into several parts:
+
+&nbsp;&nbsp;&nbsp;&nbsp;**Cross-sectional analyses**
+1. Data import and merging for cognitive and rs-fMRI data _(ln 1:34)_
+2. Data cleaning _(ln 35:77)_\
+   a. recoding cognitive test missing values to NaNs from 95s\
+   b. option to subset data to MCI or non-MCI subgroups \
+4. ComBat data harmonization and controlling for age, sex, site, mean motion, race/ethnicity _(ln 78:91)_
+5. PLS regression predicting 6 cognitive tests from rs-FC data _(ln 95:204)_\
+   a. Permutation testing for singificance of overall model\
+   b. Bootstrapping for obtaining robust X-PLS weights (mapping X onto PLS latent X-scores XS)\
+   c. Plotting of associations, including Bonferroni corrected correlations between X-scores (XS) and Y variables\
+6. PLS cross-validation generatlizability testing leaving one site out _(ln 420:465)_
+7. PLS latent score associations with _(ln 359:419)_\
+   a. education \
+   b. PHQ9 \
+   c. centile brain scores \
+   d. antidepressant treatment history form (ATHF), i.e. treatment resistance \
+   e. White matter hyperintensities _(ln 466:475)_ \
+\
+**Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**\
+9. Importing longitudinal MADRS data _(ln 210:243)_\
+   a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline \
+   b. plotting and merging MADRS with baseline data\
+10. Elastic net models predicting remission (MADRS) from baseline data _(ln 244:325)_\
+   a. cross-validation\
+   b. plotting\
+11. Visualizing the timeline of assessments _(ln 670:720)_
 
 # 3. CT_pls_elnet
 This script imports Freesurfer derivatives (cortical thickness in the *aparc* atlas and subcortical volumes of the hippocampus, amygdala and striatal volumes in the *aseg* atlas); it cleans the cognitive data and runs partial least squares regression analyses testing for brain-cogntion relationships; finally it runs separate sets of elastic net regularized logitstic regression models with cross-validation to predict remission (MADRS<=10) in step 1 and step 2 of the OPTIMUM RCT starting with clinical data only, then adding cognitive data and then adding gray matter Freesurfer variables as predictors in the same set of subjects. 
