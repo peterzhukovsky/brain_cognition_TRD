@@ -29,7 +29,7 @@ The script is split into several parts:
    c. centile brain scores _(ln 513:525)_\
    d. antidepressant treatment history form (ATHF), i.e. treatment resistance (ln 526:539)\
 \
-**Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**\
+**Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**
 8. Importing longitudinal MADRS data _(ln 235)_\
    a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline (_ln 236:270)_\
    b. plotting and merging MADRS with baseline data _(ln 280:305)_
@@ -46,12 +46,12 @@ The script is split into several parts:
 1. Data import and merging for cognitive and rs-fMRI data _(ln 1:34)_
 2. Data cleaning _(ln 35:77)_\
    a. recoding cognitive test missing values to NaNs from 95s\
-   b. option to subset data to MCI or non-MCI subgroups \
+   b. option to subset data to MCI or non-MCI subgroups 
 4. ComBat data harmonization and controlling for age, sex, site, mean motion, race/ethnicity _(ln 78:91)_
 5. PLS regression predicting 6 cognitive tests from rs-FC data _(ln 95:204)_\
    a. Permutation testing for singificance of overall model\
    b. Bootstrapping for obtaining robust X-PLS weights (mapping X onto PLS latent X-scores XS)\
-   c. Plotting of associations, including Bonferroni corrected correlations between X-scores (XS) and Y variables\
+   c. Plotting of associations, including Bonferroni corrected correlations between X-scores (XS) and Y variables
 6. PLS cross-validation generatlizability testing leaving one site out _(ln 420:465)_
 7. PLS latent score associations with _(ln 359:419)_\
    a. education \
@@ -60,10 +60,10 @@ The script is split into several parts:
    d. antidepressant treatment history form (ATHF), i.e. treatment resistance \
    e. White matter hyperintensities _(ln 466:475)_ \
 \
-**Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**\
+**Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**
 9. Importing longitudinal MADRS data _(ln 210:243)_\
    a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline \
-   b. plotting and merging MADRS with baseline data\
+   b. plotting and merging MADRS with baseline data
 10. Elastic net models predicting remission (MADRS) from baseline data _(ln 244:325)_\
    a. cross-validation\
    b. plotting
