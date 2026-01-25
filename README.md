@@ -11,7 +11,8 @@ Individual scripts include:
 This script imports resting-state fMRI derivatives (210 pairwise connectivities between large ICs derived from over 4k UKB participants); it cleans the cognitive data and runs partial least squares regression analyses testing for brain-cogntion relationships; finally it runs separate sets of elastic net regularized logitstic regression models with cross-validation to predict remission (MADRS<=10) in step 1 and step 2 of the OPTIMUM RCT starting with clinical data only, then adding cognitive data and then adding RSFC data as predictors in the same set of subjects. 
 
 The script is split into several parts:
-&nbsp;&nbsp;**I. Cross-sectional analyses**\
+
+&nbsp;&nbsp;**Cross-sectional analyses**\
 1. Data import and merging for cognitive and rs-fMRI data
 2. Data cleaning
    a. recoding cognitive test missing values to NaNs from 95s<br>
