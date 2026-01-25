@@ -12,7 +12,7 @@ This script imports resting-state fMRI derivatives (210 pairwise connectivities 
 
 The script is split into several parts:
 
-&nbsp;&nbsp;**Cross-sectional analyses**
+&nbsp;&nbsp;&nbsp;&nbsp;**Cross-sectional analyses**
 1. Data import and merging for cognitive and rs-fMRI data
 2. Data cleaning
    a. recoding cognitive test missing values to NaNs from 95s<br>
