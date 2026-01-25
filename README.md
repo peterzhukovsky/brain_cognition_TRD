@@ -14,20 +14,20 @@ The script is split into several parts:
 **I. Cross-sectional analyses**
 1. Data import and merging for cognitive and rs-fMRI data
 2. Data cleaning
-   a. recoding cognitive test missing values to NaNs from 95s
-   b. option to subset data to MCI or non-MCI subgroups (ln 80:84)
+   a. recoding cognitive test missing values to NaNs from 95s <br>
+   b. option to subset data to MCI or non-MCI subgroups (ln 80:84) <br>
 4. ComBat data harmonization and controlling for age, sex, site, mean motion, race/ethnicity
 5. PLS regression predicting 6 cognitive tests from 210:
-   a. Permutation testing for singificance of overall model
-   b. Bootstrapping for obtaining robust X-PLS weights (mapping X onto PLS latent X-scores XS)
-   c. Plotting of associations, including Bonferroni corrected correlations between X-scores (XS) and Y variables
+   a. Permutation testing for singificance of overall model <br>
+   b. Bootstrapping for obtaining robust X-PLS weights (mapping X onto PLS latent X-scores XS) <br>
+   c. Plotting of associations, including Bonferroni corrected correlations between X-scores (XS) and Y variables <br>
 6. PLS cross-validation generatlizability testing leaving one site out (ln 540:597)
 7. PLS latent score associations with education (ln 465:480)
 8. PLS latent score associations with PHQ9 (ln 484:491)
 9. PLS latent score associations with centile brain scores (ln 513:525)
 10. PLS latent score associations with antidepressant treatment history form (ATHF), i.e. treatment resistance (ln 526:539)
 
-**II. Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**
+<br>**II. Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**
 11. Importing longitudinal MADRS data (ln 235)
    a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline (ln 236:270)
    b. plotting and merging MADRS with baseline data (ln 280:305)
