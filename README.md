@@ -16,12 +16,12 @@ The script is split into several parts:
 1. Data import and merging for cognitive and rs-fMRI data
 2. Data cleaning\
    a. recoding cognitive test missing values to NaNs from 95s\
-   b. option to subset data to MCI or non-MCI subgroups _(ln 80:84)_\
+   b. option to subset data to MCI or non-MCI subgroups _(ln 80:84)_
 4. ComBat data harmonization and controlling for age, sex, site, mean motion, race/ethnicity
 5. PLS regression predicting 6 cognitive tests from rs-FC data _(ln 85:230)_\
    a. Permutation testing for singificance of overall model\
    b. Bootstrapping for obtaining robust X-PLS weights (mapping X onto PLS latent X-scores XS)\
-   c. Plotting of associations, including Bonferroni corrected correlations between X-scores (XS) and Y variables\
+   c. Plotting of associations, including Bonferroni corrected correlations between X-scores (XS) and Y variables
 6. PLS cross-validation generatlizability testing leaving one site out _(ln 540:597)_
 7. PLS latent score associations with\
    a. education _(ln 465:480)_\
@@ -32,10 +32,10 @@ The script is split into several parts:
 **Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**\
 8. Importing longitudinal MADRS data _(ln 235)_\
    a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline (_ln 236:270)_\
-   b. plotting and merging MADRS with baseline data _(ln 280:305)_\
+   b. plotting and merging MADRS with baseline data _(ln 280:305)_
 9. Elastic net models predicting remission (MADRS) from baseline data _(ln 330:394)_\
    a. cross-validation _(330:394)_\
-   b. plotting _(ln 395:410)_\
+   b. plotting _(ln 395:410)_
 10. Visualizing the timeline of assessments _(ln 670:720)_
 
 # 2. dti_pls
