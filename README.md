@@ -66,7 +66,7 @@ The script is split into several parts:
    b. plotting and merging MADRS with baseline data\
 10. Elastic net models predicting remission (MADRS) from baseline data _(ln 244:325)_\
    a. cross-validation\
-   b. plotting\
+   b. plotting
 11. Visualizing the timeline of assessments _(ln 670:720)_
 
 # 3. CT_pls_elnet
