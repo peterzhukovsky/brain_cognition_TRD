@@ -18,7 +18,7 @@ The script is split into several parts:
    a. recoding cognitive test missing values to NaNs from 95s<br>
    b. option to subset data to MCI or non-MCI subgroups (ln 80:84)<br>
 4. ComBat data harmonization and controlling for age, sex, site, mean motion, race/ethnicity
-5. PLS regression predicting 6 cognitive tests from 210:\
+5. PLS regression predicting 6 cognitive tests from rs-FC data (ln 85:230)\
    a. Permutation testing for singificance of overall model\
    b. Bootstrapping for obtaining robust X-PLS weights (mapping X onto PLS latent X-scores XS)\
    c. Plotting of associations, including Bonferroni corrected correlations between X-scores (XS) and Y variables\
