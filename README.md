@@ -11,7 +11,7 @@ Individual scripts include:
 This script imports resting-state fMRI derivatives (210 pairwise connectivities between large ICs derived from over 4k UKB participants); it cleans the cognitive data and runs partial least squares regression analyses testing for brain-cogntion relationships; finally it runs separate sets of elastic net regularized logitstic regression models with cross-validation to predict remission (MADRS<=10) in step 1 and step 2 of the OPTIMUM RCT starting with clinical data only, then adding cognitive data and then adding RSFC data as predictors in the same set of subjects. 
 
 The script is split into several parts:\
-**I. Cross-sectional analyses**
+&nbsp;**I. Cross-sectional analyses**
 1. Data import and merging for cognitive and rs-fMRI data
 2. Data cleaning
    a. recoding cognitive test missing values to NaNs from 95s<br>
@@ -26,7 +26,6 @@ The script is split into several parts:\
 8. PLS latent score associations with PHQ9 (ln 484:491)
 9. PLS latent score associations with centile brain scores (ln 513:525)
 10. PLS latent score associations with antidepressant treatment history form (ATHF), i.e. treatment resistance (ln 526:539)\
-
 **II. Baseline MRI, cognitive data vs longitudinal MADRS data from OPTIMUM clinical trial**\
 11. Importing longitudinal MADRS data (ln 235)\
    a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline (ln 236:270)\
