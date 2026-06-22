@@ -248,19 +248,17 @@ madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'end
 madrs_cut(madrs_cut.remission==0,:)=[];
 madrs_cut.remission=madrs_cut.madrs_tot_scr<=10;
 
-madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'step_2'))) ;madrs_cut(madrs_cut.remission==1,:)=[];
+madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'step_1'))) ;madrs_cut(madrs_cut.remission==1,:)=[];
 madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'arm_7'))) ;madrs_cut(madrs_cut.remission==1,:)=[];
 madrs_cut.remission=madrs_cut.madrs_tot_scr<=10;
 
-
-%anova1(madrs_cut.T_EmC_right, madrs_cut.remission);
-Xlogist=[madrs_cut.dti, madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr,madrs_cut.RC_Z, madrs_cut.DTMT4_Scaled]; 
-varnames=vertcat(tracts_included,{'age'},{'sex'}, {'baseline_madrs_scr'}, 'coding', 'tmt4');
-%Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr,madrs_cut.RC_Z, madrs_cut.DTMT4_Scaled]; varnames=vertcat({'age'},{'sex'}, {'baseline_madrs_scr'}, 'coding', 'tmt4');
-Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr]; varnames=vertcat({'age'},{'sex'}, {'baseline_madrs_scr'});
+Xlogist=[madrs_cut.dti, madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr, madrs_cut.AIS_01,madrs_cut.IMIS_01,madrs_cut.MDMIS_01,madrs_cut.EXEC_01];
+varnames=horzcat(tracts_included',{'age'},{'sex'}, {'baseline_madrs_scr'},{'attn'},{'imMem'},{'delMem'},{'exec'});
+%Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr, madrs_cut.DTMT4_Scaled, madrs_cut.RC_Z]; varnames=horzcat({'age'},{'sex'}, {'baseline_madrs_scr'},{'tmt'},{'coding'});
+%Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr]; varnames=horzcat({'age'},{'sex'}, {'baseline_madrs_scr'});
 Ylogist=madrs_cut.remission;
 
-[B,FitInfo] = lassoglm(Xlogist,Ylogist,'binomial','alpha',0.5,'CV',10, 'PredictorNames', varnames);
+[B,FitInfo] = lassoglm(Xlogist,Ylogist,'binomial','alpha',0.1,'CV',10, 'PredictorNames',varnames);
 %lassoPlot(B,FitInfo,'PlotType','CV'); legend('show','Location','best') % show legend
 idxLambdaMinDeviance = FitInfo.IndexMinDeviance;
 MinModelPredictors = FitInfo.PredictorNames(B(:,idxLambdaMinDeviance)~=0)
@@ -269,48 +267,70 @@ sparseModelPredictors = FitInfo.PredictorNames(B(:,idxLambda1SE)~=0)
 B0 = FitInfo.Intercept(idxLambdaMinDeviance);
 coef = [B0; B(:,idxLambdaMinDeviance)];
 yhat = glmval(coef,Xlogist,'logit');[X,Y,T,AUC] = perfcurve(Ylogist,yhat, 1);AUC
+%Xlogist=Xlogist(:,B(:,idxLambdaMinDeviance)~=0);varnames=varnames(B(:,idxLambdaMinDeviance)~=0); %pasimonious model test > set alpha to very low 0.001
 
-figure;coef_all=[];confusionmatrices=[];yhat_all=[];ytest_all=[];
-for i=1:100
-%if(i==1); ix=zeros([294,1]); ix(1:20)=1; elseif (i==10); ix=zeros([294,1]); ix(20*(i-1)+1:196)=1; 
-%else; ix=zeros([294,1]); ix(20*(i-1)+1:20*(i-1)+20)=1;end
+
+%MADRS + COG model:
+%Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr, madrs_cut.MDMIS_01, madrs_cut.EXEC_01, madrs_cut.AIS_01]; varnames=[{'age'}, {'sex'},{'blmadrs'}, {'MemD'}, {'Exec'}, {'Attn'}];
+%MADRS clinical only model:
+%Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr]; varnames=[{'age'}, {'sex'},{'blmadrs'}];
+permutation_index = randperm(length(Ylogist));%for randfold=1%:20
+figure;coef_all=[];confusionmatrices=[];yhat_all=[];ytest_all=[];yhatBinom_all=[]; n=length(madrs_cut.ID_madrs_cut)
+%n=394 > 10fold > 40 (40*0.26); %%% n=199 > 8fold > 25 (20*0.33)
+for i=1:100 %8
+    i
+%   if(i==1); ix=zeros([n,1]); ix(1:20)=1; elseif (i==8)
+%   ix=zeros([n,1]); ix(20*(i-1)+1:n)=1; else
+%   ix=zeros([n,1]); ix(20*(i-1)+1:20*(i-1)+20)=1; end; ix=ix(permutation_index);
 permutation_index = randperm(length(Ylogist));ix=zeros([length(madrs_cut.ID_madrs_cut), 1]);
-ix(permutation_index(1:32))=1;  %ix(permutation_index(31:304))=0;  
+ix(permutation_index(1:15))=1;  %ix(permutation_index(31:304))=0;  
 XTest=Xlogist(ix==1,:);XTrain=Xlogist(ix==0,:); 
 yTest=Ylogist(ix==1);yTrain=Ylogist(ix==0);
 
-[B,FitInfo] = lassoglm(XTrain,yTrain,'binomial','CV',10, 'PredictorNames', varnames,'alpha', 0.5);
+[B,FitInfo] = lassoglm(XTrain,yTrain,'binomial','CV',10, 'PredictorNames', varnames,'alpha', 0.01);%0.001 - ideal thresh for best model assessment 
 idxLambdaMinDeviance = FitInfo.IndexMinDeviance;
 B0 = FitInfo.Intercept(idxLambdaMinDeviance);
 coef = [B0; B(:,idxLambdaMinDeviance)]; coef_all=[coef_all,coef];
 %predicted vs observed
 yhat = glmval(coef,XTest,'logit');yhat_all=[yhat_all; yhat];ytest_all=[ytest_all; yTest];
-yhatBinom = (yhat>=0.35);
+yhatBinom = (yhat>=0.35);yhatBinom_all=[yhatBinom_all; yhatBinom];
 if i<11;    subplot(2,5,i); c=confusionchart(yTest,yhatBinom); end
 c=confusionchart(yTest,yhatBinom);
 confusionmatrices(i,:,:)=c.NormalizedValues;
 [X,Y,T,AUC] = perfcurve(yTest,yhat, 1);AUC_test(i)=AUC;
 end
-mean(AUC_test)
-[X,Y,T,AUC] = perfcurve(ytest_all,yhat_all, 1);AUC %sum(confusionmatrices)
+%AUC_test
+[X,Y,T,AUC] = perfcurve(ytest_all,yhat_all, 1);AUC %AUC_test(randfold)=AUC;
+mean(AUC_test) %end
+yhatBinom_all=yhat_all>0.29;figure;c=confusionchart(ytest_all,double(yhatBinom_all)) %33 25
+[sensitivity, specificity, accuracy, F1score]=gofmeasures_2d_square(c.NormalizedValues)
 
-[sensitivity, specificity, accuracy, F1score]=gofmeasures_3d_square(confusionmatrices)
+cd C:\Users\peter\Documents\OPT\OPT\reports\dti_2023\dti_pls_2026\step1
+load('MADRSCOGCT_holdoutAUC_rerun_100.mat');figure(2);hold off;plot(X,Y,'Color',[0/255 180/255 0/255]);AUC_all(1)=AUC
+clear AUC_test_a;
+AUC_test_a(3,:)=AUC_test;
+load('COGMADRS_only_NoCT_holdoutAUC_rerun100.mat');figure(2);hold on;plot(X,Y,'Color',[204/255 0 204/255]); AUC_all(2)=AUC
+AUC_test_a(2,:)=AUC_test;
+load('MADRS_onlyNoCT_holdoutAUC_rerun_100.mat');figure(2);hold on;plot(X,Y,'Color',[255/255 0 127/255]); set(gca,'box','off');AUC_all(3)=AUC
+AUC_test_a(1,:)=AUC_test; %figure; b = bar(AUC_all,'k');
+%load('AUC_alpha.001_CTmodel_3.mat'); figure(2);hold on;plot(X,Y,'k');
 
-
-load('DTI_holdoutAUC_rerun100.mat');figure(2);hold off;plot(X,Y,'Color',[0/255 180/255 0/255]);AUC_all(1)=AUC
-AUC_test_all(3,:)=AUC_test;
-load('COGMADRS_only_noDTI_holdoutAUC_rerun100.mat');figure(2);hold on;plot(X,Y,'Color',[204/255 0 204/255]); AUC_all(2)=AUC
-AUC_test_all(2,:)=AUC_test;
-load('MADRS_only_noDTI_holdoutAUC100.mat');figure(2);hold on;plot(X,Y,'Color',[255/255 0 127/255]);set(gca,'box','off'); AUC_all(3)=AUC
-AUC_test_all(1,:)=AUC_test; %figure; b = bar(AUC_all,'k');
-figure; yyaxis right; set(gca, 'color', 'none'); b = bar(mean(AUC_test_all'));
-SEM = std(AUC_test_all')/sqrt(100);
-hold on; [ngroups,nbars] = size(mean(AUC_test_all'));
+AUC_test_a(AUC_test_a==0.5)=NaN;
+figure(3); hold off; yyaxis right; set(gca, 'color', 'none'); b = bar(nanmean(AUC_test_a'));
+SEM = nanstd(AUC_test_a'); 
+hold on; [ngroups,nbars] = size(nanmean(AUC_test_a'));
 tmp = nan(nbars, ngroups); for i = 1:nbars    tmp(i) = b.XEndPoints(i); end
-errorbar(tmp',mean(AUC_test_all'), 2*SEM,'k','linestyle','none');ylim([0.5 0.8]);hold on
-b = bar([1; 2; 3],diag(mean(AUC_test_all')),'stacked');
-b(1).FaceColor=[255/255 0 127/255];b(2).FaceColor=[204/255 0 204/255]; b(3).FaceColor=[0/255 180/255 0/255];
+errorbar(tmp',nanmean(AUC_test_a'), SEM,'k','linestyle','none');ylim([0.5 0.8]);hold on
+figure(3); b = bar([1; 2; 3],diag(nanmean(AUC_test_a')),'stacked'); 
+b(1).FaceColor=[255/255 0 127/255];b(2).FaceColor=[204/255 0 204/255]; b(3).FaceColor=[0/255 180/255 0/255];ylim([0.5 0.89])
 
+figure(3); hold on; yyaxis right; set(gca, 'color', 'none'); b = violinplot((AUC_test_a'));
+b(1).ScatterPlot.MarkerFaceColor=[0.80,0.00,0.50]; b(2).ScatterPlot.MarkerFaceColor=[0.60,0.00,0.60]; b(3).ScatterPlot.MarkerFaceColor=[0/255 180/255 0/255]; 
+b(1).ScatterPlot.MarkerEdgeColor=[0.50,0.50,0.50];b(2).ScatterPlot.MarkerEdgeColor=[0.50,0.50,0.50];b(3).ScatterPlot.MarkerEdgeColor=[0.50,0.50,0.50];
+ylim([0 1.1])
+
+
+%%
 
 madrs_cut.T_EmC_right=madrs_cut.dti(:,19);madrs_cut.T_SF_right=madrs_cut.dti(:,32);madrs_cut.T_CB_right=madrs_cut.dti(:,4);
 madrs_cut.T_SLFIII_right=madrs_cut.dti(:,35);madrs_cut.T_SLFII_left=madrs_cut.dti(:,34);madrs_cut.T_UF_left=madrs_cut.dti(:,61);
