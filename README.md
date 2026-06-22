@@ -34,9 +34,9 @@ The script is split into several parts:
    a. merging MADRS longitudinal data dates with the baseline data (dates of assessment) and defining remitters/nonremitters after 6wks of treatment vs patients at baseline (_ln 236:270)_\
    b. plotting and merging MADRS with baseline data _(ln 280:305)_
 8. Elastic net models predicting remission (MADRS) from baseline data _(ln 330:394)_\
-   a. cross-validation _(330:394)_\
-   b. plotting _(ln 395:410)_
-9. Visualizing the timeline of assessments _(ln 670:720)_
+   a. cross-validation _(330:430)_\
+   b. plotting _(ln 432:455)_
+9. Visualizing the timeline of assessments _(ln 720:769)_
 
 # 2. dti_pls
 This script imports fractional anisotropy (FA) derivatives from DTI imaging (mean FA in ~60 tracts that were successfully reconstructed using UKF tractography); it cleans the cognitive data and runs partial least squares regression analyses testing for brain-cogntion relationships; finally it runs separate sets of elastic net regularized logitstic regression models with cross-validation to predict remission (MADRS<=10) in step 1 and step 2 of the OPTIMUM RCT starting with clinical data only, then adding cognitive data and then adding FA data as predictors in the same set of subjects. 
