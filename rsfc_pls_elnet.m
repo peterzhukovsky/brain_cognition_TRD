@@ -335,7 +335,7 @@ madrs_cut.remission=madrs_cut.madrs_tot_scr<=10;
 
 madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'step_1'))) ; %step 2 and arm 7 or step 1 and arm 8
 madrs_cut(madrs_cut.remission==1,:)=[];
-madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'arm_8'))) ;
+madrs_cut.remission=~cellfun(@isempty,(strfind(madrs_cut.redcap_event_name, 'arm_7'))) ;
 madrs_cut(madrs_cut.remission==1,:)=[];
 madrs_cut.remission=madrs_cut.madrs_tot_scr<=10;
 %madrs_cut(madrs_cut.OnAripiprazole~=1,:)=[];%madrs_cut(madrs_cut.OnBupropion~=1,:)=[];%madrs_cut(madrs_cut.OnNortriptyline~=1,:)=[];%
@@ -348,7 +348,7 @@ varnames=horzcat(ICs_vector,{'age'},{'sex'}, {'baseline_madrs_scr'},{'attn'},{'i
 %Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr]; varnames=horzcat({'age'},{'sex'}, {'baseline_madrs_scr'});
 Ylogist=madrs_cut.remission;
 
-[B,FitInfo] = lassoglm(Xlogist,Ylogist,'binomial','alpha',0.5,'CV',10, 'PredictorNames',varnames);
+[B,FitInfo] = lassoglm(Xlogist,Ylogist,'binomial','alpha',0.1,'CV',10, 'PredictorNames',varnames);
 %lassoPlot(B,FitInfo,'PlotType','CV'); legend('show','Location','best') % show legend
 idxLambdaMinDeviance = FitInfo.IndexMinDeviance;
 MinModelPredictors = FitInfo.PredictorNames(B(:,idxLambdaMinDeviance)~=0)
@@ -359,21 +359,25 @@ coef = [B0; B(:,idxLambdaMinDeviance)];
 yhat = glmval(coef,Xlogist,'logit');[X,Y,T,AUC] = perfcurve(Ylogist,yhat, 1);AUC
 %Xlogist=Xlogist(:,B(:,idxLambdaMinDeviance)~=0);varnames=varnames(B(:,idxLambdaMinDeviance)~=0); %pasimonious model test > set alpha to very low 0.001
 
-figure;coef_all=[];confusionmatrices=[];yhat_all=[];ytest_all=[];yhatBinom_all=[]; 
-for i=1:500
-    %if(i==1); ix=zeros([304,1]); ix(1:30)=1; elseif (i==10)
-    %ix=zeros([304,1]); ix(30*(i-1)+1:30*(i-1)+34)=1; else
-    %ix=zeros([304,1]); ix(30*(i-1)+1:30*(i-1)+30)=1; end
-    %if(i==1); ix=zeros([135,1]); ix(1:20)=1; elseif (i==10)
-    %ix=zeros([135,1]); ix(20*(i-1)+1:135)=1; else
-    %ix=zeros([135,1]); ix(20*(i-1)+1:20*(i-1)+20)=1; end
-    %ix=ix(permutation_index);
+
+%MADRS + COG model:
+%Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr, madrs_cut.MDMIS_01, madrs_cut.EXEC_01, madrs_cut.AIS_01]; varnames=[{'age'}, {'sex'},{'blmadrs'}, {'MemD'}, {'Exec'}, {'Attn'}];
+%MADRS clinical only model:
+%Xlogist=[madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr]; varnames=[{'age'}, {'sex'},{'blmadrs'}];
+permutation_index = randperm(length(Ylogist));%for randfold=1%:20
+figure;coef_all=[];confusionmatrices=[];yhat_all=[];ytest_all=[];yhatBinom_all=[]; n=length(madrs_cut.ID_madrs_cut)
+%n=394 > 10fold > 40 (40*0.26); %%% n=199 > 8fold > 25 (20*0.33)
+for i=1:100 %8
+    i
+%   if(i==1); ix=zeros([n,1]); ix(1:20)=1; elseif (i==8)
+%   ix=zeros([n,1]); ix(20*(i-1)+1:n)=1; else
+%   ix=zeros([n,1]); ix(20*(i-1)+1:20*(i-1)+20)=1; end; ix=ix(permutation_index);
 permutation_index = randperm(length(Ylogist));ix=zeros([length(madrs_cut.ID_madrs_cut), 1]);
-ix(permutation_index(1:20))=1;  %ix(permutation_index(31:304))=0;  
+ix(permutation_index(1:15))=1;  %ix(permutation_index(31:304))=0;  
 XTest=Xlogist(ix==1,:);XTrain=Xlogist(ix==0,:); 
 yTest=Ylogist(ix==1);yTrain=Ylogist(ix==0);
 
-[B,FitInfo] = lassoglm(XTrain,yTrain,'binomial','CV',10, 'PredictorNames', varnames,'alpha', 0.0001);
+[B,FitInfo] = lassoglm(XTrain,yTrain,'binomial','CV',10, 'PredictorNames', varnames,'alpha', 0.01);%0.001 - ideal thresh for best model assessment 
 idxLambdaMinDeviance = FitInfo.IndexMinDeviance;
 B0 = FitInfo.Intercept(idxLambdaMinDeviance);
 coef = [B0; B(:,idxLambdaMinDeviance)]; coef_all=[coef_all,coef];
@@ -385,28 +389,73 @@ c=confusionchart(yTest,yhatBinom);
 confusionmatrices(i,:,:)=c.NormalizedValues;
 [X,Y,T,AUC] = perfcurve(yTest,yhat, 1);AUC_test(i)=AUC;
 end
-AUC_test
-[X,Y,T,AUC] = perfcurve(ytest_all,yhat_all, 1);AUC %sum(confusionmatrices)
-
-[sensitivity, specificity, accuracy, F1score]=gofmeasures_3d_square(confusionmatrices)
-yhatBinom_all=yhat_all>0.28;figure;c=confusionchart(ytest_all,double(yhatBinom_all))
+%AUC_test
+[X,Y,T,AUC] = perfcurve(ytest_all,yhat_all, 1);AUC %AUC_test(randfold)=AUC;
+mean(AUC_test) %end
+yhatBinom_all=yhat_all>0.29;figure;c=confusionchart(ytest_all,double(yhatBinom_all)) %33 25
 [sensitivity, specificity, accuracy, F1score]=gofmeasures_2d_square(c.NormalizedValues)
 
 
+sensitivity=sum(confusionmatrices(:,2,2))/sum(sum(confusionmatrices(:,2,:)))
+specificity=sum(confusionmatrices(:,1,1))/sum(sum(confusionmatrices(:,1,:)))
+accuracy=(sum(confusionmatrices(:,1,1))+sum(confusionmatrices(:,2,2)))/sum(sum(sum(confusionmatrices(:,:,:))))
+F1score=2*sum(confusionmatrices(:,2,2))/(2*sum(confusionmatrices(:,2,2))+ sum(confusionmatrices(:,2,1))+ sum(confusionmatrices(:,1,2)) )
 
-load('RSFMRI_holdoutAUC_rerun100.mat');figure(2);hold on;plot(X,Y,'Color',[160/255 160/255 0]);AUC_all(1)=AUC
-AUC_test_all(3,:)=AUC_test;
-load('COGMADRS_onlyNoRSFMRI_holdoutAUC_rerun100.mat');figure(2);hold on;plot(X,Y,'Color',[204/255 0 204/255]); AUC_all(2)=AUC
-AUC_test_all(2,:)=AUC_test;
-load('MADRS_only_noRSFMRI_holdoutAUC_100.mat');figure(2);hold on;plot(X,Y,'Color',[255/255 0 127/255]); set(gca,'box','off');AUC_all(3)=AUC
-AUC_test_all(1,:)=AUC_test; %figure; b = bar(AUC_all,'k');
-figure; yyaxis right; set(gca, 'color', 'none'); b = bar(mean(AUC_test_all'));
-SEM = std(AUC_test_all')/sqrt(100);
-hold on; [ngroups,nbars] = size(mean(AUC_test_all'));
+% run the best model on non overlapping xval
+permutation_index = randperm(length(Ylogist));%for randfold=1%:20
+figure;AUC_test=[];coef_all=[];confusionmatrices=[];yhat_all=[];ytest_all=[];yhatBinom_all=[]; n=length(madrs_cut.ID_madrs_cut)
+for i=1:8
+    i
+   if(i==1); ix=zeros([n,1]); ix(1:20)=1; elseif (i==8)
+   ix=zeros([n,1]); ix(20*(i-1)+1:n)=1; else
+   ix=zeros([n,1]); ix(20*(i-1)+1:20*(i-1)+20)=1; end; ix=ix(permutation_index);
+XTest=Xlogist(ix==1,:);XTrain=Xlogist(ix==0,:); 
+yTest=Ylogist(ix==1);yTrain=Ylogist(ix==0);
+
+[B,FitInfo] = lassoglm(XTrain,yTrain,'binomial','CV',10, 'PredictorNames', varnames,'alpha', 0.001);
+idxLambdaMinDeviance = FitInfo.IndexMinDeviance;
+B0 = FitInfo.Intercept(idxLambdaMinDeviance);
+coef = [B0; B(:,idxLambdaMinDeviance)]; coef_all=[coef_all,coef];
+%predicted vs observed
+yhat = glmval(coef,XTest,'logit');yhat_all=[yhat_all; yhat];ytest_all=[ytest_all; yTest];
+yhatBinom = (yhat>=0.35);yhatBinom_all=[yhatBinom_all; yhatBinom];
+if i<11;    subplot(2,5,i); c=confusionchart(yTest,yhatBinom); end
+c=confusionchart(yTest,yhatBinom);
+confusionmatrices(i,:,:)=c.NormalizedValues;
+[X,Y,T,AUC] = perfcurve(yTest,yhat, 1);AUC_test(i)=AUC;
+end
+[X,Y,T,AUC] = perfcurve(ytest_all,yhat_all, 1);AUC %AUC_test(randfold)=AUC;
+%end
+yhatBinom_all=yhat_all>0.29;figure;c=confusionchart(ytest_all,double(yhatBinom_all)) %33 25
+[sensitivity, specificity, accuracy, F1score]=gofmeasures_2d_square(c.NormalizedValues)
+
+cd C:\Users\peter\Documents\OPT\OPT\reports\rsfc_2023\fc_pls_2026\step2
+load('MADRSCOGCT_holdoutAUC_rerun_100.mat');figure(2);hold off;plot(X,Y,'Color',[160/255 160/255 0]);AUC_all(1)=AUC
+AUC_test_a(3,:)=AUC_test;
+load('COGMADRS_only_NoCT_holdoutAUC_rerun100.mat');figure(2);hold on;plot(X,Y,'Color',[204/255 0 204/255]); AUC_all(2)=AUC
+AUC_test_a(2,:)=AUC_test;
+load('MADRS_onlyNoCT_holdoutAUC_rerun_100.mat');figure(2);hold on;plot(X,Y,'Color',[255/255 0 127/255]); set(gca,'box','off');AUC_all(3)=AUC
+AUC_test_a(1,:)=AUC_test; %figure; b = bar(AUC_all,'k');
+%load('AUC_alpha.001_CTmodel_3.mat'); figure(2);hold on;plot(X,Y,'k');
+
+AUC_test_a(AUC_test_a==0.5)=NaN;
+figure(3); hold off; yyaxis right; set(gca, 'color', 'none'); b = bar(nanmean(AUC_test_a'));
+SEM = nanstd(AUC_test_a'); 
+hold on; [ngroups,nbars] = size(nanmean(AUC_test_a'));
 tmp = nan(nbars, ngroups); for i = 1:nbars    tmp(i) = b.XEndPoints(i); end
-errorbar(tmp',mean(AUC_test_all'), 2*SEM,'k','linestyle','none');ylim([0.5 0.8]);hold on
-b = bar([1; 2; 3],diag(mean(AUC_test_all')),'stacked');
-b(1).FaceColor=[255/255 0 127/255];b(2).FaceColor=[204/255 0 204/255]; b(3).FaceColor=[160/255 160/255 0];
+errorbar(tmp',nanmean(AUC_test_a'), SEM,'k','linestyle','none');ylim([0.5 0.8]);hold on
+figure(3); b = bar([1; 2; 3],diag(nanmean(AUC_test_a')),'stacked'); 
+b(1).FaceColor=[255/255 0 127/255];b(2).FaceColor=[204/255 0 204/255]; b(3).FaceColor=[160/255 160/255 0];ylim([0.5 0.89])
+
+
+figure(3); hold on; yyaxis right; set(gca, 'color', 'none'); b = violinplot((AUC_test_a'));
+b(1).ScatterPlot.MarkerFaceColor=[0.80,0.00,0.50]; b(2).ScatterPlot.MarkerFaceColor=[0.60,0.00,0.60]; b(3).ScatterPlot.MarkerFaceColor=[160/255 160/255 0]; 
+b(1).ScatterPlot.MarkerEdgeColor=[0.50,0.50,0.50];b(2).ScatterPlot.MarkerEdgeColor=[0.50,0.50,0.50];b(3).ScatterPlot.MarkerEdgeColor=[0.50,0.50,0.50];
+
+ylim([0.3 1.1]);
+
+
+
 %% NAIVE BAYES
 Xlogist=[madrs_cut.rsfc, madrs_cut.AGE, madrs_cut.GENDER, madrs_cut.baseline_madrs_scr, madrs_cut.DTMT4_Scaled, madrs_cut.RC_Z];
 varnames=horzcat(ICs_vector,{'age'},{'sex'}, {'baseline_madrs_scr'},{'tmt'},{'coding'});
